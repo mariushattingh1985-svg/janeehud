@@ -1,24 +1,25 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
--- Get players count
-QBCore.Functions.CreateCallback('GetPlayers', function(source, cb)
-    cb(#GetPlayers())
-end)
-
--- Get bank money
-QBCore.Functions.CreateCallback('GetMoney', function(source, cb)
-    local Player = QBCore.Functions.GetPlayer(source)
+RegisterNetEvent('QBCore:Server:OnPlayerLoaded')
+AddEventHandler('QBCore:Server:OnPlayerLoaded', function()
+    local src = source
+    Wait(500)
+    local Player = QBCore.Functions.GetPlayer(src)
     if Player then
-        cb(Player.PlayerData.money.bank)
-    else
-        cb(0)
+        TriggerClientEvent('QBCore:Player:SetPlayerData', src, Player.PlayerData)
     end
 end)
 
-RegisterNetEvent('QBCore:UpdatePlayer', function()
-    local source = source
-    local Player = QBCore.Functions.GetPlayer(source)
+RegisterNetEvent('QBCore:Server:PlayerLoaded')
+AddEventHandler('QBCore:Server:PlayerLoaded', function()
+    local src = source
+    Wait(500)
+    local Player = QBCore.Functions.GetPlayer(src)
     if Player then
-        TriggerClientEvent('QBCore:Player:SetPlayerData', source, Player.PlayerData)
+        TriggerClientEvent('QBCore:Player:SetPlayerData', src, Player.PlayerData)
     end
+end)
+
+AddEventHandler('playerJoining', function()
+    print('^2[QB-HUD]^7 Player joining')
 end)

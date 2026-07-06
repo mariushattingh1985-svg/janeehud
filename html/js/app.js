@@ -1,5 +1,4 @@
 const app = {
-    config: {},
     hudData: {
         health: 100,
         armor: 0,
@@ -12,12 +11,6 @@ const app = {
         location: 'Unknown',
         time: '00:00',
     },
-    status: {
-        talking: false,
-        speaker: false,
-        recording: false,
-        handcuffed: false,
-    },
 
     init: function() {
         console.log('[HUD] App initialized');
@@ -29,115 +22,79 @@ const app = {
             const data = event.data;
             
             if (data.action === 'initialize') {
-                this.config = data.config;
-                console.log('[HUD] Config received:', this.config);
+                console.log('[HUD] Initialized');
             } else if (data.action === 'updateHud') {
                 this.hudData = data.data;
                 this.updateDisplay();
             } else if (data.action === 'toggleHud') {
                 this.toggleHud(data.state);
-            } else if (data.action === 'updateStatus') {
-                this.updateStatus(data.status, data.state);
-            } else if (data.action === 'notify') {
-                this.showNotification(data.data);
             }
         });
     },
 
     updateDisplay: function() {
-        if (this.config.ShowElements?.health !== false) {
-            this.updateProgressBar('health', this.hudData.health);
-        }
+        // Update Health
+        const healthProgress = document.getElementById('health-progress');
+        const healthValue = document.getElementById('health-value');
+        if (healthProgress) healthProgress.style.width = Math.max(0, Math.min(100, this.hudData.health)) + '%';
+        if (healthValue) healthValue.textContent = Math.floor(this.hudData.health);
 
-        if (this.config.ShowElements?.armor !== false) {
-            this.updateProgressBar('armor', this.hudData.armor);
-        }
+        // Update Armor
+        const armorProgress = document.getElementById('armor-progress');
+        const armorValue = document.getElementById('armor-value');
+        if (armorProgress) armorProgress.style.width = Math.max(0, Math.min(100, this.hudData.armor)) + '%';
+        if (armorValue) armorValue.textContent = Math.floor(this.hudData.armor);
 
-        if (this.config.ShowElements?.hunger !== false) {
-            this.updateProgressBar('hunger', this.hudData.hunger);
-        }
+        // Update Hunger
+        const hungerProgress = document.getElementById('hunger-progress');
+        const hungerValue = document.getElementById('hunger-value');
+        if (hungerProgress) hungerProgress.style.width = Math.max(0, Math.min(100, this.hudData.hunger)) + '%';
+        if (hungerValue) hungerValue.textContent = Math.floor(this.hudData.hunger);
 
-        if (this.config.ShowElements?.thirst !== false) {
-            this.updateProgressBar('thirst', this.hudData.thirst);
-        }
+        // Update Thirst
+        const thirstProgress = document.getElementById('thirst-progress');
+        const thirstValue = document.getElementById('thirst-value');
+        if (thirstProgress) thirstProgress.style.width = Math.max(0, Math.min(100, this.hudData.thirst)) + '%';
+        if (thirstValue) thirstValue.textContent = Math.floor(this.hudData.thirst);
 
-        if (this.config.ShowElements?.stress !== false) {
-            this.updateProgressBar('stress', this.hudData.stress);
-        }
+        // Update Stress
+        const stressProgress = document.getElementById('stress-progress');
+        const stressValue = document.getElementById('stress-value');
+        if (stressProgress) stressProgress.style.width = Math.max(0, Math.min(100, this.hudData.stress)) + '%';
+        if (stressValue) stressValue.textContent = Math.floor(this.hudData.stress);
 
-        if (this.config.ShowElements?.money !== false) {
-            document.getElementById('cash-value').textContent = '$' + this.formatNumber(this.hudData.cash);
-            document.getElementById('bank-value').textContent = '$' + this.formatNumber(this.hudData.bank);
-        }
+        // Update Money
+        const cashValue = document.getElementById('cash-value');
+        const bankValue = document.getElementById('bank-value');
+        if (cashValue) cashValue.textContent = '$' + this.formatNumber(this.hudData.cash);
+        if (bankValue) bankValue.textContent = '$' + this.formatNumber(this.hudData.bank);
 
-        if (this.config.ShowElements?.speedometer !== false) {
-            document.getElementById('speed-value').textContent = this.hudData.speedometer;
-        }
+        // Update Speedometer
+        const speedValue = document.getElementById('speed-value');
+        if (speedValue) speedValue.textContent = Math.floor(this.hudData.speedometer);
 
-        if (this.config.ShowElements?.minimap !== false) {
-            document.getElementById('location').textContent = this.hudData.location || 'Unknown';
-        }
-        if (this.config.ShowElements?.clock !== false) {
-            document.getElementById('time').textContent = this.hudData.time || '00:00';
-        }
-    },
+        // Update Location
+        const location = document.getElementById('location');
+        if (location) location.textContent = this.hudData.location || 'Unknown';
 
-    updateProgressBar: function(type, value) {
-        const element = document.getElementById(type + '-progress');
-        const valueElement = document.getElementById(type + '-value');
-        
-        if (element) {
-            element.style.width = Math.max(0, Math.min(100, value)) + '%';
-        }
-        if (valueElement) {
-            valueElement.textContent = Math.floor(value);
-        }
+        // Update Time
+        const time = document.getElementById('time');
+        if (time) time.textContent = this.hudData.time || '00:00';
     },
 
     toggleHud: function(state) {
         const container = document.getElementById('hud-container');
-        if (state) {
-            container.classList.remove('hud-hidden');
-        } else {
-            container.classList.add('hud-hidden');
-        }
-    },
-
-    updateStatus: function(status, state) {
-        this.status[status] = state;
-        const element = document.getElementById(status + '-indicator');
-        
-        if (element) {
+        if (container) {
             if (state) {
-                element.classList.add('active');
+                container.classList.remove('hud-hidden');
             } else {
-                element.classList.remove('active');
+                container.classList.add('hud-hidden');
             }
         }
     },
 
-    showNotification: function(data) {
-        const container = document.getElementById('notifications');
-        const notification = document.createElement('div');
-        notification.className = 'notification ' + (data.type || 'info');
-        notification.innerHTML = `
-            <div>
-                <div class="notification-title">${data.title || 'Notification'}</div>
-                <div class="notification-message">${data.message || ''}</div>
-            </div>
-        `;
-        
-        container.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, data.duration || 5000);
-    },
-
     formatNumber: function(num) {
+        num = parseInt(num) || 0;
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     },
 };
