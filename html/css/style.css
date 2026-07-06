@@ -1,0 +1,345 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    background: transparent;
+    overflow: hidden;
+}
+
+#hud-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    font-size: 14px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+#hud-container.hud-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hud-top {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    z-index: 100;
+}
+
+.location-info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 5px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.location-info span {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.hud-bottom-left {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.status-bar {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 12px;
+    border-radius: 4px;
+    min-width: 200px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.status-bar:hover {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-value {
+    color: #fff;
+    font-weight: 700;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.2s ease;
+}
+
+.progress-fill.health {
+    background: linear-gradient(90deg, #ff4444 0%, #ffaa44 100%);
+}
+
+.progress-fill.armor {
+    background: linear-gradient(90deg, #4488ff 0%, #44ffff 100%);
+}
+
+.progress-fill.hunger {
+    background: linear-gradient(90deg, #ff8844 0%, #ffff44 100%);
+}
+
+.progress-fill.thirst {
+    background: linear-gradient(90deg, #4488ff 0%, #44ffff 100%);
+}
+
+.progress-fill.stress {
+    background: linear-gradient(90deg, #ff4444 0%, #ff00ff 100%);
+}
+
+.hud-bottom-right {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.money-display {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 12px 16px;
+    border-radius: 4px;
+    min-width: 180px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.money-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.money-label {
+    font-weight: 600;
+    color: #aaa;
+}
+
+.money-value {
+    font-weight: 700;
+    color: #44ff44;
+    font-family: 'Courier New', monospace;
+}
+
+.speedometer-display {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 12px 16px;
+    border-radius: 4px;
+    min-width: 180px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.speed-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.speed-label {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 600;
+}
+
+.speed-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffaa44;
+    font-family: 'Courier New', monospace;
+}
+
+.speed-unit {
+    font-size: 11px;
+    color: #888;
+}
+
+.status-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+}
+
+.indicator {
+    display: none;
+    background: rgba(255, 0, 0, 0.7);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    animation: pulse-animation 0.6s infinite;
+}
+
+.indicator.active {
+    display: flex;
+}
+
+.indicator .pulse {
+    width: 8px;
+    height: 8px;
+    background: #ff0000;
+    border-radius: 50%;
+    animation: pulse-dot 0.6s infinite;
+}
+
+@keyframes pulse-animation {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-dot {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(255, 0, 0, 0.2);
+    }
+}
+
+.notifications-container {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 350px;
+}
+
+.notification {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 12px 16px;
+    border-radius: 4px;
+    border-left: 4px solid #44ff44;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    animation: slideIn 0.3s ease;
+}
+
+.notification.error {
+    border-left-color: #ff4444;
+}
+
+.notification.warning {
+    border-left-color: #ffaa44;
+}
+
+.notification.success {
+    border-left-color: #44ff44;
+}
+
+.notification-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.notification-message {
+    font-size: 13px;
+    color: #ccc;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@media (max-width: 1024px) {
+    .status-bar {
+        min-width: 150px;
+    }
+    
+    .hud-top {
+        gap: 20px;
+    }
+}
