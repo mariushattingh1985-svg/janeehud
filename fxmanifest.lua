@@ -1,9 +1,9 @@
 fx_version 'cerulean'
 game 'gta5'
 
-author 'Janee HUD'
-description 'Advanced QB-HUD System'
-version '1.0.0'
+author 'Professional HUD'
+description 'Modern QB-HUD System - Production Ready'
+version '2.0.0'
 
 ui_page 'html/index.html'
 
@@ -19,18 +19,12 @@ files {
     'html/index.html',
     'html/css/style.css',
     'html/js/app.js',
-    'html/js/hud.js',
 }
 
 exports {
     'ShowHud',
     'HideHud',
     'UpdateHud',
-    'SetHealth',
-    'SetArmor',
-    'SetHunger',
-    'SetThirst',
-    'SetStress',
 }
 
 dependencies {

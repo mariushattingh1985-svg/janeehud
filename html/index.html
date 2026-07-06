@@ -3,122 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Janee HUD</title>
+    <title>QB-HUD</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="hud-container" class="hud-active">
-        <!-- Top Bar -->
-        <div class="hud-top">
+    <div id="hud-container" class="hud-visible">
+        <!-- Top Info Bar -->
+        <div class="top-bar">
             <div class="location-info">
-                <span id="location">Los Santos</span>
-                <span id="time">00:00</span>
+                <div class="location-main" id="location">Los Santos</div>
+                <div class="location-street" id="street">Unknown Street</div>
+            </div>
+            
+            <div class="time-info">
+                <div class="time" id="time">00:00</div>
+                <div class="players" id="players">👥 0</div>
             </div>
         </div>
 
-        <!-- Bottom Left - Status Bars -->
-        <div class="hud-bottom-left">
+        <!-- Left Side - Status Bars -->
+        <div class="left-panel">
             <!-- Health -->
-            <div class="status-bar health-bar">
-                <div class="status-label">
-                    <span>❤️ Health</span>
-                    <span id="health-value" class="status-value">100</span>
+            <div class="status-item health">
+                <div class="status-header">
+                    <span class="status-icon">❤️</span>
+                    <span class="status-label">HEALTH</span>
+                    <span class="status-value" id="health-value">100</span>
                 </div>
-                <div class="progress-bar">
-                    <div id="health-progress" class="progress-fill health" style="width: 100%"></div>
+                <div class="status-bar">
+                    <div class="status-fill" id="health-fill" style="width: 100%"></div>
                 </div>
             </div>
 
             <!-- Armor -->
-            <div class="status-bar armor-bar">
-                <div class="status-label">
-                    <span>🛡️ Armor</span>
-                    <span id="armor-value" class="status-value">0</span>
+            <div class="status-item armor">
+                <div class="status-header">
+                    <span class="status-icon">🛡️</span>
+                    <span class="status-label">ARMOR</span>
+                    <span class="status-value" id="armor-value">0</span>
                 </div>
-                <div class="progress-bar">
-                    <div id="armor-progress" class="progress-fill armor" style="width: 0%"></div>
+                <div class="status-bar">
+                    <div class="status-fill" id="armor-fill" style="width: 0%"></div>
                 </div>
             </div>
 
             <!-- Hunger -->
-            <div class="status-bar hunger-bar">
-                <div class="status-label">
-                    <span>🍖 Hunger</span>
-                    <span id="hunger-value" class="status-value">100</span>
+            <div class="status-item hunger">
+                <div class="status-header">
+                    <span class="status-icon">🍖</span>
+                    <span class="status-label">HUNGER</span>
+                    <span class="status-value" id="hunger-value">100</span>
                 </div>
-                <div class="progress-bar">
-                    <div id="hunger-progress" class="progress-fill hunger" style="width: 100%"></div>
+                <div class="status-bar">
+                    <div class="status-fill" id="hunger-fill" style="width: 100%"></div>
                 </div>
             </div>
 
             <!-- Thirst -->
-            <div class="status-bar thirst-bar">
-                <div class="status-label">
-                    <span>💧 Thirst</span>
-                    <span id="thirst-value" class="status-value">100</span>
+            <div class="status-item thirst">
+                <div class="status-header">
+                    <span class="status-icon">💧</span>
+                    <span class="status-label">THIRST</span>
+                    <span class="status-value" id="thirst-value">100</span>
                 </div>
-                <div class="progress-bar">
-                    <div id="thirst-progress" class="progress-fill thirst" style="width: 100%"></div>
+                <div class="status-bar">
+                    <div class="status-fill" id="thirst-fill" style="width: 100%"></div>
                 </div>
             </div>
 
             <!-- Stress -->
-            <div class="status-bar stress-bar">
-                <div class="status-label">
-                    <span>😰 Stress</span>
-                    <span id="stress-value" class="status-value">0</span>
+            <div class="status-item stress">
+                <div class="status-header">
+                    <span class="status-icon">😰</span>
+                    <span class="status-label">STRESS</span>
+                    <span class="status-value" id="stress-value">0</span>
                 </div>
-                <div class="progress-bar">
-                    <div id="stress-progress" class="progress-fill stress" style="width: 0%"></div>
+                <div class="status-bar">
+                    <div class="status-fill" id="stress-fill" style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Bottom Right - Money & Speedometer -->
-        <div class="hud-bottom-right">
-            <!-- Money Display -->
-            <div class="money-display">
+        <!-- Right Side - Money & Job -->
+        <div class="right-panel">
+            <!-- Job Info -->
+            <div class="info-box job-info">
+                <div class="info-title">JOB</div>
+                <div class="info-content">
+                    <div class="job-label" id="job">Unemployed</div>
+                    <div class="job-grade" id="job-grade"></div>
+                </div>
+            </div>
+
+            <!-- Money -->
+            <div class="money-box">
                 <div class="money-item cash">
-                    <span class="money-label">Cash</span>
-                    <span id="cash-value" class="money-value">$0</span>
+                    <span class="money-label">CASH</span>
+                    <span class="money-value" id="cash">$0</span>
                 </div>
                 <div class="money-item bank">
-                    <span class="money-label">Bank</span>
-                    <span id="bank-value" class="money-value">$0</span>
-                </div>
-            </div>
-
-            <!-- Speedometer -->
-            <div class="speedometer-display">
-                <div class="speed-info">
-                    <span class="speed-label">Speed</span>
-                    <span id="speed-value" class="speed-value">0</span>
-                    <span class="speed-unit">mph</span>
+                    <span class="money-label">BANK</span>
+                    <span class="money-value" id="bank">$0</span>
                 </div>
             </div>
         </div>
 
-        <!-- Status Indicators -->
-        <div class="status-indicators">
-            <div id="talking-indicator" class="indicator talking" title="Talking">
-                <span class="pulse"></span> 🎤
-            </div>
-            <div id="speaker-indicator" class="indicator speaker" title="Speaker">
-                <span class="pulse"></span> 🔊
-            </div>
-            <div id="recording-indicator" class="indicator recording" title="Recording">
-                <span class="pulse"></span> 🔴
-            </div>
-            <div id="handcuffed-indicator" class="indicator handcuffed" title="Handcuffed">
-                <span class="pulse"></span> 🔒
+        <!-- Bottom - Speedometer -->
+        <div class="bottom-bar">
+            <div class="speedometer-container" id="speedometer-container" style="display: none;">
+                <div class="speed-display">
+                    <div class="speed-value" id="speed">0</div>
+                    <div class="speed-unit">MPH</div>
+                </div>
             </div>
         </div>
-
-        <!-- Notifications -->
-        <div id="notifications" class="notifications-container"></div>
     </div>
 
     <script src="js/app.js"></script>
-    <script src="js/hud.js"></script>
 </body>
 </html>
