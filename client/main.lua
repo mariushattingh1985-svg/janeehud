@@ -1,6 +1,4 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local Config = require('shared.config')
-local Utils = require('shared.utils')
 
 local hudActive = true
 local hudData = {
@@ -24,25 +22,26 @@ AddEventHandler('onResourceStart', function(resourceName)
     if GetCurrentResourceName() ~= resourceName then return end
     SendNUIMessage({
         action = 'initialize',
-        config = Config,
+        config = {},
     })
-    Utils.Log('HUD Initialized')
+    print('^2[QB-HUD]^7 HUD Initialized')
 end)
 
 -- Update HUD every tick
 AddEventHandler('playerSpawned', function()
-    TriggerEvent('hud:client:UpdateHud')
+    TriggerEvent('hud:client:UpdatePlayerData')
 end)
 
 -- Main HUD Update Loop
 CreateThread(function()
     while true do
-        Wait(Config.UpdateInterval)
+        Wait(100)
 
-        local ped = Utils.GetPlayerPed()
+        local ped = PlayerPedId()
         
         -- Update Health
-        hudData.health = math.floor((GetEntityHealth(ped) - 100) / 1.5)
+        local health = GetEntityHealth(ped)
+        hudData.health = math.floor((health - 100) / 1.5)
         if hudData.health < 0 then hudData.health = 0 end
         if hudData.health > 100 then hudData.health = 100 end
 
@@ -50,10 +49,10 @@ CreateThread(function()
         hudData.armor = GetPedArmour(ped)
 
         -- Update Speedometer
-        if Utils.IsPlayerInVehicle() then
+        if GetVehiclePedIsIn(ped, false) ~= 0 then
             local vehicle = GetVehiclePedIsIn(ped, false)
             local speed = GetEntitySpeed(vehicle)
-            hudData.speedometer = Utils.ConvertSpeed(speed, Config.Speedometer.unit)
+            hudData.speedometer = math.floor(speed * 2.236936) -- mph
         else
             hudData.speedometer = 0
         end
@@ -61,7 +60,7 @@ CreateThread(function()
         -- Update Time
         local hour = GetClockHours()
         local minute = GetClockMinutes()
-        hudData.time = Utils.FormatTime(hour, minute)
+        hudData.time = string.format("%02d:%02d", hour, minute)
 
         -- Update Location
         local playerCoords = GetEntityCoords(ped)
@@ -88,10 +87,27 @@ AddEventHandler('hud:client:UpdatePlayerData', function()
         hudData.hunger = PlayerData.status['hunger'] or 100
         hudData.thirst = PlayerData.status['thirst'] or 100
         hudData.stress = PlayerData.status['stress'] or 0
+        
+        SendNUIMessage({
+            action = 'updateHud',
+            data = hudData,
+        })
     end
 end)
 
--- Toggle HUD
+-- Listen for money changes
+RegisterNetEvent('QBCore:Client:OnMoneyChange', function(data)
+    if data then
+        TriggerEvent('hud:client:UpdatePlayerData')
+    end
+end)
+
+-- Listen for status changes
+RegisterNetEvent('QBCore:Client:OnStatusChange', function(status, amount)
+    TriggerEvent('hud:client:UpdatePlayerData')
+end)
+
+-- Toggle HUD Command
 RegisterCommand('togglehud', function(source, args, rawCommand)
     hudActive = not hudActive
     SendNUIMessage({
@@ -125,11 +141,15 @@ end
 
 -- Update HUD Export
 function UpdateHud(newData)
-    hudData = newData
-    SendNUIMessage({
-        action = 'updateHud',
-        data = hudData,
-    })
+    if newData then
+        for key, value in pairs(newData) do
+            hudData[key] = value
+        end
+        SendNUIMessage({
+            action = 'updateHud',
+            data = hudData,
+        })
+    end
 end
 
 -- Set Health Export
@@ -168,6 +188,15 @@ function SetThirst(thirst)
     })
 end
 
+-- Set Stress Export
+function SetStress(stress)
+    hudData.stress = math.floor(stress)
+    SendNUIMessage({
+        action = 'updateHud',
+        data = hudData,
+    })
+end
+
 exports('ShowHud', ShowHud)
 exports('HideHud', HideHud)
 exports('UpdateHud', UpdateHud)
@@ -175,3 +204,4 @@ exports('SetHealth', SetHealth)
 exports('SetArmor', SetArmor)
 exports('SetHunger', SetHunger)
 exports('SetThirst', SetThirst)
+exports('SetStress', SetStress)

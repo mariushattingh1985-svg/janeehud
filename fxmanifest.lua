@@ -7,14 +7,8 @@ version '1.0.0'
 
 ui_page 'html/index.html'
 
-shared_scripts {
-    'shared/config.lua',
-    'shared/utils.lua',
-}
-
 client_scripts {
     'client/main.lua',
-    'client/utils.lua',
     'client/events.lua',
 }
 
@@ -38,6 +32,7 @@ exports {
     'SetArmor',
     'SetHunger',
     'SetThirst',
+    'SetStress',
 }
 
 dependencies {
