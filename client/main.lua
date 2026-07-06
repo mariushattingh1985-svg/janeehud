@@ -1,6 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-
 local hudActive = true
+local PlayerLoaded = false
 local hudData = {
     health = 100,
     armor = 0,
@@ -11,100 +11,113 @@ local hudData = {
     bank = 0,
     speedometer = 0,
     location = 'Unknown',
-    direction = 'N',
     time = '00:00',
-    talking = false,
-    speaker = false,
 }
 
 -- Initialize HUD
 AddEventHandler('onResourceStart', function(resourceName)
     if GetCurrentResourceName() ~= resourceName then return end
+    print('^2[QB-HUD]^7 HUD Started')
+end)
+
+-- Player Loaded
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    PlayerLoaded = true
+    print('^2[QB-HUD]^7 Player Loaded')
     SendNUIMessage({
         action = 'initialize',
         config = {},
     })
-    print('^2[QB-HUD]^7 HUD Initialized')
 end)
 
--- Update HUD every tick
-AddEventHandler('playerSpawned', function()
-    TriggerEvent('hud:client:UpdatePlayerData')
+RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    PlayerLoaded = false
 end)
 
 -- Main HUD Update Loop
 CreateThread(function()
     while true do
-        Wait(100)
+        if PlayerLoaded then
+            local ped = PlayerPedId()
+            
+            -- Update Health (0-100)
+            local health = GetEntityHealth(ped)
+            hudData.health = math.floor((health - 100) / 1.5)
+            if hudData.health < 0 then hudData.health = 0 end
+            if hudData.health > 100 then hudData.health = 100 end
 
-        local ped = PlayerPedId()
-        
-        -- Update Health
-        local health = GetEntityHealth(ped)
-        hudData.health = math.floor((health - 100) / 1.5)
-        if hudData.health < 0 then hudData.health = 0 end
-        if hudData.health > 100 then hudData.health = 100 end
+            -- Update Armor (0-100)
+            hudData.armor = GetPedArmour(ped)
 
-        -- Update Armor
-        hudData.armor = GetPedArmour(ped)
+            -- Update Speedometer
+            if IsPedInAnyVehicle(ped, false) then
+                local vehicle = GetVehiclePedIsIn(ped, false)
+                local speed = GetEntitySpeed(vehicle)
+                hudData.speedometer = math.floor(speed * 2.236936) -- mph
+            else
+                hudData.speedometer = 0
+            end
 
-        -- Update Speedometer
-        if GetVehiclePedIsIn(ped, false) ~= 0 then
-            local vehicle = GetVehiclePedIsIn(ped, false)
-            local speed = GetEntitySpeed(vehicle)
-            hudData.speedometer = math.floor(speed * 2.236936) -- mph
-        else
-            hudData.speedometer = 0
+            -- Update Time
+            local hour = GetClockHours()
+            local minute = GetClockMinutes()
+            hudData.time = string.format("%02d:%02d", hour, minute)
+
+            -- Update Location
+            local coords = GetEntityCoords(ped)
+            hudData.location = GetLabelText(GetNameOfZone(coords.x, coords.y, coords.z))
+
+            -- Send to NUI
+            SendNUIMessage({
+                action = 'updateHud',
+                data = hudData,
+            })
         end
-
-        -- Update Time
-        local hour = GetClockHours()
-        local minute = GetClockMinutes()
-        hudData.time = string.format("%02d:%02d", hour, minute)
-
-        -- Update Location
-        local playerCoords = GetEntityCoords(ped)
-        hudData.location = GetZoneName(playerCoords)
-
-        -- Send to NUI
-        SendNUIMessage({
-            action = 'updateHud',
-            data = hudData,
-        })
+        Wait(100)
     end
 end)
 
--- Handle Player Data
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    TriggerEvent('hud:client:UpdatePlayerData')
-end)
-
-AddEventHandler('hud:client:UpdatePlayerData', function()
-    if QBCore.Player and QBCore.Player.PlayerData then
-        local PlayerData = QBCore.Player.PlayerData
-        hudData.cash = PlayerData.money['cash'] or 0
-        hudData.bank = PlayerData.money['bank'] or 0
-        hudData.hunger = PlayerData.status['hunger'] or 100
-        hudData.thirst = PlayerData.status['thirst'] or 100
-        hudData.stress = PlayerData.status['stress'] or 0
-        
-        SendNUIMessage({
-            action = 'updateHud',
-            data = hudData,
-        })
+-- Update from QBCore
+RegisterNetEvent('QBCore:Player:SetPlayerData', function(data)
+    if data.money then
+        hudData.cash = data.money['cash'] or 0
+        hudData.bank = data.money['bank'] or 0
     end
+    if data.status then
+        hudData.hunger = data.status['hunger'] or 100
+        hudData.thirst = data.status['thirst'] or 100
+        hudData.stress = data.status['stress'] or 0
+    end
+    
+    SendNUIMessage({
+        action = 'updateHud',
+        data = hudData,
+    })
 end)
 
--- Listen for money changes
+-- Money Changes
 RegisterNetEvent('QBCore:Client:OnMoneyChange', function(data)
-    if data then
-        TriggerEvent('hud:client:UpdatePlayerData')
+    if data.money then
+        hudData.cash = data.money['cash'] or hudData.cash
+        hudData.bank = data.money['bank'] or hudData.bank
     end
+    SendNUIMessage({
+        action = 'updateHud',
+        data = hudData,
+    })
 end)
 
--- Listen for status changes
-RegisterNetEvent('QBCore:Client:OnStatusChange', function(status, amount)
-    TriggerEvent('hud:client:UpdatePlayerData')
+-- Status Changes
+RegisterNetEvent('QBCore:Client:OnStatusChange', function(data)
+    for k, v in pairs(data) do
+        if k == 'hunger' then hudData.hunger = v end
+        if k == 'thirst' then hudData.thirst = v end
+        if k == 'stress' then hudData.stress = v end
+    end
+    SendNUIMessage({
+        action = 'updateHud',
+        data = hudData,
+    })
 end)
 
 -- Toggle HUD Command
@@ -121,7 +134,7 @@ RegisterCommand('togglehud', function(source, args, rawCommand)
     })
 end)
 
--- Show HUD Export
+-- Exports
 function ShowHud()
     hudActive = true
     SendNUIMessage({
@@ -130,7 +143,6 @@ function ShowHud()
     })
 end
 
--- Hide HUD Export
 function HideHud()
     hudActive = false
     SendNUIMessage({
@@ -139,11 +151,12 @@ function HideHud()
     })
 end
 
--- Update HUD Export
 function UpdateHud(newData)
     if newData then
         for key, value in pairs(newData) do
-            hudData[key] = value
+            if hudData[key] ~= nil then
+                hudData[key] = value
+            end
         end
         SendNUIMessage({
             action = 'updateHud',
@@ -152,45 +165,40 @@ function UpdateHud(newData)
     end
 end
 
--- Set Health Export
 function SetHealth(health)
-    hudData.health = math.floor(health)
+    hudData.health = math.floor(math.max(0, math.min(100, health)))
     SendNUIMessage({
         action = 'updateHud',
         data = hudData,
     })
 end
 
--- Set Armor Export
 function SetArmor(armor)
-    hudData.armor = math.floor(armor)
+    hudData.armor = math.floor(math.max(0, math.min(100, armor)))
     SendNUIMessage({
         action = 'updateHud',
         data = hudData,
     })
 end
 
--- Set Hunger Export
 function SetHunger(hunger)
-    hudData.hunger = math.floor(hunger)
+    hudData.hunger = math.floor(math.max(0, math.min(100, hunger)))
     SendNUIMessage({
         action = 'updateHud',
         data = hudData,
     })
 end
 
--- Set Thirst Export
 function SetThirst(thirst)
-    hudData.thirst = math.floor(thirst)
+    hudData.thirst = math.floor(math.max(0, math.min(100, thirst)))
     SendNUIMessage({
         action = 'updateHud',
         data = hudData,
     })
 end
 
--- Set Stress Export
 function SetStress(stress)
-    hudData.stress = math.floor(stress)
+    hudData.stress = math.floor(math.max(0, math.min(100, stress)))
     SendNUIMessage({
         action = 'updateHud',
         data = hudData,

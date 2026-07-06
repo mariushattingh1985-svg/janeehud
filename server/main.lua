@@ -1,22 +1,24 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
--- Server-side HUD initialization
-AddEventHandler('onResourceStart', function(resourceName)
-    if GetCurrentResourceName() ~= resourceName then return end
-    print('^2[Janee HUD]^7 Server script started successfully!^0')
+-- Get players count
+QBCore.Functions.CreateCallback('GetPlayers', function(source, cb)
+    cb(#GetPlayers())
 end)
 
--- Player Join
-AddEventHandler('playerJoining', function()
-    print('^3[Janee HUD]^7 Player joining...')
+-- Get bank money
+QBCore.Functions.CreateCallback('GetMoney', function(source, cb)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if Player then
+        cb(Player.PlayerData.money.bank)
+    else
+        cb(0)
+    end
 end)
 
--- Player Loaded
-AddEventHandler('QBCore:Server:PlayerLoaded', function(Player)
-    print('^3[Janee HUD]^7 Player ' .. Player.PlayerData.charinfo.firstname .. ' loaded')
-end)
-
--- Player Left
-AddEventHandler('playerDropped', function(reason)
-    print('^3[Janee HUD]^7 Player left. Reason: ' .. reason)
+RegisterNetEvent('QBCore:UpdatePlayer', function()
+    local source = source
+    local Player = QBCore.Functions.GetPlayer(source)
+    if Player then
+        TriggerClientEvent('QBCore:Player:SetPlayerData', source, Player.PlayerData)
+    end
 end)
